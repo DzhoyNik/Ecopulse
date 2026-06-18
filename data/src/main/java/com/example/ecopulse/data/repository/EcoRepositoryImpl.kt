@@ -5,6 +5,7 @@ import com.example.ecopulse.data.model.UserProfileEntity
 import com.example.ecopulse.data.model.mapper.toDomain
 import com.example.ecopulse.domain.repository.EcoRepository
 import com.example.ecopulse.domain.model.EcoGoal
+import com.example.ecopulse.domain.model.EcoTip
 import com.example.ecopulse.domain.model.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,4 +60,12 @@ class EcoRepositoryImpl : EcoRepository {
             }
         }
     }
+
+    override fun getEcoTips(): Flow<List<EcoTip>> = kotlinx.coroutines.flow.flowOf(
+        listOf(
+            EcoTip("1", "Как правильно сортировать пластик?", "Ищите маркировку 1 (PET) и 2 (HDPE). Обязательно споласкивайте тару перед сдачей.", "Сортировка"),
+            EcoTip("2", "Энергосбережение дома", "Замените лампы накаливания на светодиодные (LED) — это снизит потребление энергии до 80%.", "Дом"),
+            EcoTip("3", "Осознанное потребление", "Перед покупкой вещи сделайте паузу на 24 часа. Это защитит от импульсивных трат и лишнего мусора.", "Шопинг")
+        )
+    )
 }
