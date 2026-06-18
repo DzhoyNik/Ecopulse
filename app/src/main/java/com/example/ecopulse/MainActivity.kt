@@ -27,6 +27,12 @@ import com.example.ecopulse.presentation.profile.ProfileViewModel
 import com.example.ecopulse.presentation.stats.StatsScreen
 import com.example.ecopulse.presentation.stats.StatsViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.ecopulse.data.worker.EcoSyncWorker
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -127,5 +133,16 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED) // Только при наличии интернета
+            .setRequiresCharging(true) // Только на зарядке (экономим батарею)
+            .build()
+
+        val syncRequest = PeriodicWorkRequestBuilder<EcoSyncWorker>(24, TimeUnit.HOURS)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(applicationContext).enqueue(syncRequest)
     }
 }
