@@ -1,9 +1,20 @@
 package com.example.ecopulse.data.model
 
+import com.google.firebase.firestore.PropertyName
+
 data class UserProfileEntity(
-    val uid: String,
-    val fullName: String,
-    val accountEmail: String,
-    val currentPoints: Int,
-    val completedCount: Int
+    @get:PropertyName("uid") @set:PropertyName("uid")
+    var uid: String = "",
+
+    @get:PropertyName("fullName") @set:PropertyName("fullName")
+    var fullName: String = "",
+
+    @get:PropertyName("accountEmail") @set:PropertyName("accountEmail")
+    var accountEmail: String = "",
+
+    @get:PropertyName("currentPoints") @set:PropertyName("currentPoints")
+    var currentPoints: Int = 0,
+
+    @get:PropertyName("completedCount") @set:PropertyName("completedCount")
+    var completedCount: Int = 0
 )

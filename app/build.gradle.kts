@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -108,6 +109,16 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    // Firebase BOM — управляет версиями всех Firebase библиотек
+    val firebaseBom = platform("com.google.firebase:firebase-bom:33.1.0")
+    implementation(firebaseBom)
+
+// Firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+// FCM (Push-уведомления)
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
