@@ -43,22 +43,36 @@ class EcoRepositoryImpl : EcoRepository {
     }
 
     override suspend fun completeGoal(goalId: String) {
-        // Ищем документ по значению поля goalId, а не по имени документа
-        val snapshot = db.collection("goals")
-            .whereEqualTo("goalId", goalId.toLongOrNull() ?: goalId)
-            .get().await()
+        try {
+            // Ищем строго по строке, как хранится в Firebase
+            val snapshot = db.collection("goals")
+                .whereEqualTo("goalId", goalId)   // ← без toLongOrNull()
+                .get()
+                .await()
 
-        val doc = snapshot.documents.firstOrNull() ?: return
-        val goal = doc.toObject(EcoGoalEntity::class.java) ?: return
-        if (goal.statusCompleted) return
+            val doc = snapshot.documents.firstOrNull() ?: run {
+                println("Goal not found: $goalId") // для отладки
+                return
+            }
 
-        doc.reference.update("statusCompleted", true).await()
+            val goal = doc.toObject(EcoGoalEntity::class.java) ?: return
 
-        db.collection("users").document("user_77")
-            .update(
-                "currentPoints", com.google.firebase.firestore.FieldValue.increment(goal.rewardAmount.toLong()),
-                "completedCount", com.google.firebase.firestore.FieldValue.increment(1)
-            ).await()
+            if (goal.statusCompleted) return
+
+            // Обновляем цель
+            doc.reference.update("statusCompleted", true).await()
+
+            // Начисляем награду пользователю
+            db.collection("users").document("user_77")
+                .update(
+                    "currentPoints", com.google.firebase.firestore.FieldValue.increment(goal.rewardAmount),
+                    "completedCount", com.google.firebase.firestore.FieldValue.increment(1)
+                ).await()
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Можно добавить Toast или отправку ошибки в UI позже
+        }
     }
 
     override fun getEcoTips(): Flow<List<EcoTip>> = flowOf(
