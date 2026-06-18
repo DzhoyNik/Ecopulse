@@ -2,6 +2,7 @@ package com.example.ecopulse.presentation.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ecopulse.BuildConfig
 import com.example.ecopulse.domain.usecase.GetUserProfileUseCase
 import com.google.ai.client.generativeai.GenerativeModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,9 +27,10 @@ class AiAdvisorViewModel @Inject constructor(
     private val _state = MutableStateFlow<AiAdviceState>(AiAdviceState.Idle)
     val state = _state.asStateFlow()
 
+    private val apiKey = BuildConfig.GEMINI_API_KEY
     private val model = GenerativeModel(
         modelName = "gemini-1.5-flash",
-        apiKey = "СЮДА_ВСТАВЬ_СВОЙ_КЛЮЧ"
+        apiKey = apiKey
     )
 
     fun getPersonalAdvice() {
