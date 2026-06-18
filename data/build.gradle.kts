@@ -36,8 +36,6 @@ dependencies {
     implementation(project(":domain"))
     implementation("androidx.core:core:1.15.0")
     implementation("androidx.core:core-ktx:1.15.0")
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
