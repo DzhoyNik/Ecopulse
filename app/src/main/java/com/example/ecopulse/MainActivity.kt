@@ -16,13 +16,16 @@ import com.example.ecopulse.presentation.auth.SignInScreen
 import com.example.ecopulse.presentation.auth.SignUpScreen
 import com.example.ecopulse.presentation.goals.GoalsScreen
 import com.example.ecopulse.presentation.goals.GoalsViewModel
+import com.example.ecopulse.presentation.profile.ProfileScreen
+import com.example.ecopulse.presentation.profile.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val authViewModel: AuthViewModel by viewModels()
-    private val goalsViewModel: GoalsViewModel by viewModels() // Добавили ViewModel целей
+    private val goalsViewModel: GoalsViewModel by viewModels()
+    private val profileViewModel: ProfileViewModel by viewModels() // Добавили
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +43,6 @@ class MainActivity : ComponentActivity() {
                             SignInScreen(
                                 viewModel = authViewModel,
                                 onAuthSuccess = {
-                                    // Переходим на главный экран и очищаем бэкстек, чтобы нельзя было вернуться назад кнопкой "Назад"
                                     navController.navigate("goals") {
                                         popUpTo("signin") { inclusive = true }
                                     }
@@ -61,13 +63,20 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // НОВЫЙ МАРШРУТ: Главный экран трекера эко-целей
                         composable("goals") {
                             GoalsScreen(
                                 viewModel = goalsViewModel,
                                 onNavigateToProfile = {
-                                    // Сюда мы повесим переход на XML-экран Профиля на следующем шаге!
+                                    navController.navigate("profile") // Переходим в профиль
                                 }
+                            )
+                        }
+
+                        // МАРШРУТ ГИБРИДНОГО ЭКРАНА (XML + Compose)
+                        composable("profile") {
+                            ProfileScreen(
+                                viewModel = profileViewModel,
+                                onBack = { navController.popBackStack() }
                             )
                         }
                     }
