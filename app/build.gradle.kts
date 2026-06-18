@@ -45,13 +45,13 @@ android {
             dimension = "version"
             applicationIdSuffix = ".free"
             resValue("string", "app_name", "EcoPulse Free")
-            // Здесь можно прокинуть фича-флаг, например: buildConfigField("Boolean", "SHOW_ADS", "true")
+            buildConfigField("Boolean", "IS_PREMIUM", "false")
         }
         create("premium") {
             dimension = "version"
             applicationIdSuffix = ".premium"
             resValue("string", "app_name", "EcoPulse Pro")
-            // buildConfigField("Boolean", "SHOW_ADS", "false")
+            buildConfigField("Boolean", "IS_PREMIUM", "true")
         }
     }
 
@@ -66,6 +66,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 }
 
