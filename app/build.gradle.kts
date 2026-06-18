@@ -120,6 +120,8 @@ dependencies {
 // FCM (Push-уведомления)
     implementation("com.google.firebase:firebase-messaging-ktx")
 
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
