@@ -43,17 +43,17 @@ class EcoRepositoryImpl : EcoRepository {
     }
 
     override suspend fun completeGoal(goalId: String) {
-        // Читаем текущую цель
-        val goalDoc = db.collection("goals").document(goalId).get().await()
-        val goal = goalDoc.toObject(EcoGoalEntity::class.java) ?: return
+        // Ищем документ по значению поля goalId, а не по имени документа
+        val snapshot = db.collection("goals")
+            .whereEqualTo("goalId", goalId.toLongOrNull() ?: goalId)
+            .get().await()
+
+        val doc = snapshot.documents.firstOrNull() ?: return
+        val goal = doc.toObject(EcoGoalEntity::class.java) ?: return
         if (goal.statusCompleted) return
 
-        // Обновляем цель в Firestore
-        db.collection("goals").document(goalId)
-            .update("statusCompleted", true)
-            .await()
+        doc.reference.update("statusCompleted", true).await()
 
-        // Обновляем очки пользователя
         db.collection("users").document("user_77")
             .update(
                 "currentPoints", com.google.firebase.firestore.FieldValue.increment(goal.rewardAmount.toLong()),

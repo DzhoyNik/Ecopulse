@@ -7,11 +7,11 @@ import com.example.ecopulse.domain.model.UserProfile
 
 fun EcoGoalEntity.toDomain(): EcoGoal {
     return EcoGoal(
-        id = this.goalId,
-        title = this.titleText,
-        description = this.subDescription,
-        pointsReward = this.rewardAmount,
-        isCompleted = this.statusCompleted
+        id = goalId.toString(),  // Any.toString() работает и для Long и для String
+        title = titleText,
+        description = subDescription,
+        pointsReward = rewardAmount.toInt(),
+        isCompleted = statusCompleted
     )
 }
 
