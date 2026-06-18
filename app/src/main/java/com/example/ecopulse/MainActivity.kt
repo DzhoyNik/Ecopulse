@@ -1,7 +1,6 @@
 package com.example.ecopulse
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -15,12 +14,15 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ecopulse.presentation.auth.AuthViewModel
 import com.example.ecopulse.presentation.auth.SignInScreen
 import com.example.ecopulse.presentation.auth.SignUpScreen
+import com.example.ecopulse.presentation.goals.GoalsScreen
+import com.example.ecopulse.presentation.goals.GoalsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val authViewModel: AuthViewModel by viewModels()
+    private val goalsViewModel: GoalsViewModel by viewModels() // Добавили ViewModel целей
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,32 +34,39 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
 
-                    // Настраиваем граф навигации. Стартовая точка — "signin"
                     NavHost(navController = navController, startDestination = "signin") {
 
-                        // Маршрут экрана Входа
                         composable("signin") {
                             SignInScreen(
                                 viewModel = authViewModel,
                                 onAuthSuccess = {
-                                    Toast.makeText(this@MainActivity, "Вход успешен!", Toast.LENGTH_SHORT).show()
-                                    // Сюда позже добавим переход на Главный экран трекера
+                                    // Переходим на главный экран и очищаем бэкстек, чтобы нельзя было вернуться назад кнопкой "Назад"
+                                    navController.navigate("goals") {
+                                        popUpTo("signin") { inclusive = true }
+                                    }
                                 },
-                                onNavigateToSignUp = {
-                                    navController.navigate("signup") // Переключаемся на регистрацию
-                                }
+                                onNavigateToSignUp = { navController.navigate("signup") }
                             )
                         }
 
-                        // Маршрут экрана Регистрации
                         composable("signup") {
                             SignUpScreen(
                                 viewModel = authViewModel,
                                 onAuthSuccess = {
-                                    Toast.makeText(this@MainActivity, "Регистрация успешна!", Toast.LENGTH_SHORT).show()
+                                    navController.navigate("goals") {
+                                        popUpTo("signup") { inclusive = true }
+                                    }
                                 },
-                                onNavigateToSignIn = {
-                                    navController.popBackStack() // Возвращаемся назад на Вход
+                                onNavigateToSignIn = { navController.popBackStack() }
+                            )
+                        }
+
+                        // НОВЫЙ МАРШРУТ: Главный экран трекера эко-целей
+                        composable("goals") {
+                            GoalsScreen(
+                                viewModel = goalsViewModel,
+                                onNavigateToProfile = {
+                                    // Сюда мы повесим переход на XML-экран Профиля на следующем шаге!
                                 }
                             )
                         }
