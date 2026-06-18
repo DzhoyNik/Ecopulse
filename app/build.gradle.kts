@@ -23,13 +23,38 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true // Включаем R8/ProGuard оптимизацию и сжатие
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug") // Используем debug-ключ для простоты сборки
+        }
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
         }
     }
+
+    // Обязательно объявляем измерения для флаворов
+    flavorDimensions.add("version")
+
+    productFlavors {
+        create("free") {
+            dimension = "version"
+            applicationIdSuffix = ".free"
+            resValue("string", "app_name", "EcoPulse Free")
+            // Здесь можно прокинуть фича-флаг, например: buildConfigField("Boolean", "SHOW_ADS", "true")
+        }
+        create("premium") {
+            dimension = "version"
+            applicationIdSuffix = ".premium"
+            resValue("string", "app_name", "EcoPulse Pro")
+            // buildConfigField("Boolean", "SHOW_ADS", "false")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
