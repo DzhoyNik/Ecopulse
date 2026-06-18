@@ -32,6 +32,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.ecopulse.data.worker.EcoSyncWorker
+import com.example.ecopulse.presentation.stats.AiAdvisorViewModel
 import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
     private val goalsViewModel: GoalsViewModel by viewModels()
     private val profileViewModel: ProfileViewModel by viewModels()
     private val statsViewModel: StatsViewModel by viewModels() // Добавили 5-ю ViewModel
+    private val aiAdvisorViewModel: AiAdvisorViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,7 +127,7 @@ class MainActivity : ComponentActivity() {
 
                             // НАШ 5-й ЭКРАН СТАТИСТИКИ И ИНФО
                             composable("stats") {
-                                StatsScreen(viewModel = statsViewModel)
+                                StatsScreen(viewModel = statsViewModel, aiViewModel = aiAdvisorViewModel)
                             }
                         }
                     }
