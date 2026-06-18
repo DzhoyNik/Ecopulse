@@ -112,8 +112,7 @@ class MainActivity : ComponentActivity() {
 
                             composable("goals") {
                                 GoalsScreen(
-                                    viewModel = goalsViewModel,
-                                    onNavigateToProfile = { navController.navigate("profile") }
+                                    viewModel = goalsViewModel
                                 )
                             }
 
@@ -143,6 +142,10 @@ class MainActivity : ComponentActivity() {
             .setConstraints(constraints)
             .build()
 
-        WorkManager.getInstance(applicationContext).enqueue(syncRequest)
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "eco_sync",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            syncRequest
+        )
     }
 }
