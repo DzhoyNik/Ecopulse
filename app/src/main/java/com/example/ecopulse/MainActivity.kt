@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.getValue
@@ -22,6 +23,8 @@ import com.example.ecopulse.presentation.auth.SignInScreen
 import com.example.ecopulse.presentation.auth.SignUpScreen
 import com.example.ecopulse.presentation.goals.GoalsScreen
 import com.example.ecopulse.presentation.goals.GoalsViewModel
+import com.example.ecopulse.presentation.map.EcoMapScreen
+import com.example.ecopulse.presentation.map.EcoMapViewModel
 import com.example.ecopulse.presentation.profile.ProfileScreen
 import com.example.ecopulse.presentation.profile.ProfileViewModel
 import com.example.ecopulse.presentation.stats.StatsScreen
@@ -41,8 +44,9 @@ class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
     private val goalsViewModel: GoalsViewModel by viewModels()
     private val profileViewModel: ProfileViewModel by viewModels()
-    private val statsViewModel: StatsViewModel by viewModels() // Добавили 5-ю ViewModel
+    private val statsViewModel: StatsViewModel by viewModels()
     private val aiAdvisorViewModel: AiAdvisorViewModel by viewModels()
+    private val mapViewModel: EcoMapViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 val currentRoute = navBackStackEntry?.destination?.route
 
                 // Скрываем нижнее меню на экранах авторизации и регистрации
-                val showBottomBar = currentRoute in listOf("goals", "profile", "stats")
+                val showBottomBar = currentRoute in listOf("goals", "profile", "stats", "map")
 
                 Scaffold(
                     bottomBar = {
@@ -70,6 +74,12 @@ class MainActivity : ComponentActivity() {
                                     onClick = { navController.navigate("stats") { launchSingleTop = true } },
                                     icon = { Icon(Icons.Default.Info, contentDescription = "Инфо") },
                                     label = { Text("Аналитика") }
+                                )
+                                NavigationBarItem(
+                                    selected = currentRoute == "map",
+                                    onClick = { navController.navigate("map") { launchSingleTop = true } },
+                                    icon = { Icon(Icons.Default.Map, contentDescription = "Карта") },
+                                    label = { Text("Карта") }
                                 )
                                 NavigationBarItem(
                                     selected = currentRoute == "profile",
@@ -128,6 +138,10 @@ class MainActivity : ComponentActivity() {
                             // НАШ 5-й ЭКРАН СТАТИСТИКИ И ИНФО
                             composable("stats") {
                                 StatsScreen(viewModel = statsViewModel, aiViewModel = aiAdvisorViewModel)
+                            }
+
+                            composable("map") {
+                                EcoMapScreen(viewModel = mapViewModel)
                             }
                         }
                     }

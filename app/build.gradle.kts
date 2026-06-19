@@ -82,6 +82,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation("androidx.compose.material:material-icons-extended")
 
     val composeBom = platform("androidx.compose:compose-bom:2024.02.02")
     implementation(composeBom)
