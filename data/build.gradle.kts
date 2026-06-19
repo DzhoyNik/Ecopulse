@@ -41,6 +41,7 @@ dependencies {
     // Firebase (версии подтягиваются из BOM в :app)
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-crashlytics")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

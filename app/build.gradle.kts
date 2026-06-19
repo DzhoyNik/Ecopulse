@@ -6,6 +6,7 @@ plugins {
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -21,6 +22,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GEMINI_API_KEY", "\"${project.findProperty("GEMINI_API_KEY") ?: ""}\"")
+        // Ключ Google Maps — добавить в local.properties: MAPS_API_KEY=ВАШ_КЛЮЧ
+        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: ""
     }
 
     buildTypes {
@@ -79,6 +82,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation("androidx.compose.material:material-icons-extended")
 
     val composeBom = platform("androidx.compose:compose-bom:2024.02.02")
     implementation(composeBom)
@@ -121,7 +125,16 @@ dependencies {
 // FCM (Push-уведомления)
     implementation("com.google.firebase:firebase-messaging-ktx")
 
+// Crashlytics
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
+// Google Maps SDK
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.maps.android:maps-ktx:5.1.1")
+    implementation("com.google.maps.android:maps-compose:4.4.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

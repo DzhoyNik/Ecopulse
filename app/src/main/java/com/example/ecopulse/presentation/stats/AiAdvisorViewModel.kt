@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.ecopulse.BuildConfig
 import com.example.ecopulse.domain.usecase.GetUserProfileUseCase
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,10 +56,12 @@ class AiAdvisorViewModel @Inject constructor(
                 """.trimIndent()
 
                 val response = model.generateContent(prompt)
-                _state.value = AiAdviceState.Success(
-                    response.text ?: "Не удалось получить совет"
-                )
+                val advice = response.text ?: "Не удалось получить совет"
+                // Кастомное событие: AI-совет успешно получен
+                Firebase.crashlytics.log("ai_advice_success: points=${profile.ecoPoints} goals=${profile.completedGoalsCount}")
+                _state.value = AiAdviceState.Success(advice)
             } catch (e: Exception) {
+                Firebase.crashlytics.recordException(e)
                 _state.value = AiAdviceState.Error("Ошибка: ${e.message}")
             }
         }
