@@ -32,9 +32,21 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "GEMINI_API_KEY", "\"${project.findProperty("GEMINI_API_KEY") ?: ""}\"")
-        // Ключ Google Maps — добавить в local.properties: MAPS_API_KEY=ВАШ_КЛЮЧ
-        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: ""
+
+        // Ключи читаются из local.properties (Gradle сам его в project-свойства НЕ загружает),
+        // с откатом на gradle-property / env на CI.
+        val localProps = Properties().apply {
+            val f = rootProject.file("local.properties")
+            if (f.exists()) f.inputStream().use { load(it) }
+        }
+        fun secret(name: String): String =
+            localProps.getProperty(name)
+                ?: (project.findProperty(name) as String?)
+                ?: System.getenv(name)
+                ?: ""
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"${secret("GEMINI_API_KEY")}\"")
+        manifestPlaceholders["MAPS_API_KEY"] = secret("MAPS_API_KEY")
     }
 
     signingConfigs {

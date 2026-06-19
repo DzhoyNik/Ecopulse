@@ -20,22 +20,39 @@ class EcoRepositoryImpl : EcoRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
-    // Реальное чтение из Firestore с live-обновлениями через callbackFlow
+    // Реальное чтение из Firestore с live-обновлениями через callbackFlow.
+    // Важно: эмитим на КАЖДОЕ событие, иначе при отсутствии документа UI висит вечно.
     override fun getUserProfile(): Flow<UserProfile> = callbackFlow {
-        val listener = db.collection("users")
-            .document("user_77")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null) return@addSnapshotListener
-                val entity = snapshot.toObject(UserProfileEntity::class.java)
-                entity?.let { trySend(it.toDomain()) }
+        val docRef = db.collection("users").document("user_77")
+        val listener = docRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Firebase.crashlytics.recordException(error)
+                trySend(defaultProfile())          // не подвешиваем экран
+                return@addSnapshotListener
             }
+            if (snapshot == null || !snapshot.exists()) {
+                // Документа ещё нет — создаём заготовку и сразу отдаём дефолт
+                docRef.set(UserProfileEntity(uid = "user_77", fullName = "Эко-пользователь"))
+                trySend(defaultProfile())
+                return@addSnapshotListener
+            }
+            val entity = snapshot.toObject(UserProfileEntity::class.java) ?: UserProfileEntity(uid = "user_77")
+            trySend(entity.toDomain())
+        }
         awaitClose { listener.remove() }
     }
+
+    private fun defaultProfile(): UserProfile =
+        UserProfileEntity(uid = "user_77", fullName = "Эко-пользователь").toDomain()
 
     override fun getEcoGoals(): Flow<List<EcoGoal>> = callbackFlow {
         val listener = db.collection("goals")
             .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null) return@addSnapshotListener
+                if (error != null || snapshot == null) {
+                    if (error != null) Firebase.crashlytics.recordException(error)
+                    trySend(emptyList())           // пустой список вместо зависания
+                    return@addSnapshotListener
+                }
                 val goals = snapshot.documents
                     .mapNotNull { it.toObject(EcoGoalEntity::class.java) }
                     .map { it.toDomain() }
