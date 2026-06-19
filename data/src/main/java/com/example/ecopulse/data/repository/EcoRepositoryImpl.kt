@@ -7,7 +7,9 @@ import com.example.ecopulse.domain.model.EcoGoal
 import com.example.ecopulse.domain.model.EcoTip
 import com.example.ecopulse.domain.model.UserProfile
 import com.example.ecopulse.domain.repository.EcoRepository
+import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -37,6 +39,8 @@ class EcoRepositoryImpl : EcoRepository {
                 val goals = snapshot.documents
                     .mapNotNull { it.toObject(EcoGoalEntity::class.java) }
                     .map { it.toDomain() }
+                // Аналитическое событие: сколько целей загружено
+                Firebase.crashlytics.log("eco_goals_loaded: count=${goals.size}")
                 trySend(goals)
             }
         awaitClose { listener.remove() }
@@ -71,7 +75,9 @@ class EcoRepositoryImpl : EcoRepository {
 
         } catch (e: Exception) {
             e.printStackTrace()
-            // Можно добавить Toast или отправку ошибки в UI позже
+            // Отправляем handled-ошибку в Crashlytics с контекстом
+            Firebase.crashlytics.log("completeGoal failed for goalId=$goalId")
+            Firebase.crashlytics.recordException(e)
         }
     }
 

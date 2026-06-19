@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -172,7 +174,13 @@ private fun AiAdvisorTab(
             }
 
             is AiAdviceState.Success -> {
-                AnimatedVisibility(visible = true, enter = fadeIn(), exit = fadeOut()) {
+                // AnimatedVisibility реагирует на реальное состояние:
+                // виден только когда state is Success, иначе скрыт с анимацией
+                AnimatedVisibility(
+                    visible = state is AiAdviceState.Success,
+                    enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+                    exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+                ) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
