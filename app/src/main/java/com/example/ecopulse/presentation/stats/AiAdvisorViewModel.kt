@@ -26,9 +26,9 @@ class AiAdvisorViewModel @Inject constructor(
 
     private val _state = MutableStateFlow<AiAdviceState>(AiAdviceState.Idle)
     val state = _state.asStateFlow()
+    private val apiKey: String = BuildConfig.API_KEY
 
-    private val apiKey = BuildConfig.GEMINI_API_KEY
-    private val model = GenerativeModel(
+    val model = GenerativeModel(
         modelName = "gemini-1.5-flash",
         apiKey = apiKey
     )
