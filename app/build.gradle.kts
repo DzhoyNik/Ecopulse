@@ -1,3 +1,14 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+// Читаем keystore.properties (не коммитится). Если файла нет — release подпишется debug-ключом.
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+val hasReleaseKeystore = keystorePropertiesFile.exists()
+if (hasReleaseKeystore) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -21,20 +32,47 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "GEMINI_API_KEY", "\"${project.findProperty("GEMINI_API_KEY") ?: ""}\"")
-        // Ключ Google Maps — добавить в local.properties: MAPS_API_KEY=ВАШ_КЛЮЧ
-        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: ""
+
+        // Ключи читаются из local.properties (Gradle сам его в project-свойства НЕ загружает),
+        // с откатом на gradle-property / env на CI.
+        val localProps = Properties().apply {
+            val f = rootProject.file("local.properties")
+            if (f.exists()) f.inputStream().use { load(it) }
+        }
+        fun secret(name: String): String =
+            localProps.getProperty(name)
+                ?: (project.findProperty(name) as String?)
+                ?: System.getenv(name)
+                ?: ""
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"${secret("GEMINI_API_KEY")}\"")
+        manifestPlaceholders["MAPS_API_KEY"] = secret("MAPS_API_KEY")
+    }
+
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true // Включаем R8/ProGuard оптимизацию и сжатие
+            isMinifyEnabled = true // R8/ProGuard: оптимизация, обфускация и сжатие кода
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug") // Используем debug-ключ для простоты сборки
+            // Подписываем release-ключом, если он настроен; иначе откат на debug (чтобы сборка не падала)
+            signingConfig = if (hasReleaseKeystore)
+                signingConfigs.getByName("release")
+            else
+                signingConfigs.getByName("debug")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"

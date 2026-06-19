@@ -1,0 +1,4 @@
+# Скопируйте в local.properties (он в .gitignore) и подставьте свои значения.
+sdk.dir=/путь/к/Android/Sdk
+GEMINI_API_KEY=ваш_ключ_gemini
+MAPS_API_KEY=ваш_ключ_google_maps

@@ -18,9 +18,8 @@ class EcoPulseFcmService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        // В реальном приложении — отправить токен на сервер
-        // Для курсовой достаточно лога
-        android.util.Log.d("FCM", "New token: $token")
+        // TODO: отправить новый FCM-токен на бэкенд для адресной рассылки.
+        // Токен намеренно не логируется, чтобы не светить его в logcat в release.
     }
 
     private fun showNotification(title: String, body: String) {

@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.TimeoutCancellationException
 import javax.inject.Inject
 
 sealed class AiAdviceState {
@@ -31,14 +33,23 @@ class AiAdvisorViewModel @Inject constructor(
 
     private val apiKey = BuildConfig.GEMINI_API_KEY
     private val model = GenerativeModel(
-        modelName = "gemini-1.5-flash",
+        // 1.5-flash отключён для новых проектов (404). Актуальная модель.
+        // Точный Model API ID для вашего ключа можно проверить в Google AI Studio.
+        modelName = "gemini-2.5-flash",
         apiKey = apiKey
     )
 
     fun getPersonalAdvice() {
+        // Без ключа модель «висит» — сразу даём понятную ошибку
+        if (apiKey.isBlank()) {
+            _state.value = AiAdviceState.Error("Ключ Gemini не задан. Добавьте GEMINI_API_KEY в local.properties.")
+            return
+        }
         viewModelScope.launch {
             _state.value = AiAdviceState.Loading
             try {
+                // Жёсткий таймаут, чтобы экран не зависал бесконечно
+                val advice = withTimeout(30_000L) {
                 val profile = getUserProfileUseCase().first()
 
                 val prompt = """
@@ -56,10 +67,13 @@ class AiAdvisorViewModel @Inject constructor(
                 """.trimIndent()
 
                 val response = model.generateContent(prompt)
-                val advice = response.text ?: "Не удалось получить совет"
-                // Кастомное событие: AI-совет успешно получен
                 Firebase.crashlytics.log("ai_advice_success: points=${profile.ecoPoints} goals=${profile.completedGoalsCount}")
+                response.text ?: "Не удалось получить совет"
+                }
                 _state.value = AiAdviceState.Success(advice)
+            } catch (e: TimeoutCancellationException) {
+                Firebase.crashlytics.recordException(e)
+                _state.value = AiAdviceState.Error("Превышено время ожидания ответа ИИ")
             } catch (e: Exception) {
                 Firebase.crashlytics.recordException(e)
                 _state.value = AiAdviceState.Error("Ошибка: ${e.message}")
