@@ -55,7 +55,7 @@ class EcoRepositoryImpl : EcoRepository {
                 .await()
 
             val doc = snapshot.documents.firstOrNull() ?: run {
-                println("Goal not found: $goalId") // для отладки
+                Firebase.crashlytics.log("completeGoal: goal not found goalId=$goalId")
                 return
             }
 
@@ -74,7 +74,6 @@ class EcoRepositoryImpl : EcoRepository {
                 ).await()
 
         } catch (e: Exception) {
-            e.printStackTrace()
             // Отправляем handled-ошибку в Crashlytics с контекстом
             Firebase.crashlytics.log("completeGoal failed for goalId=$goalId")
             Firebase.crashlytics.recordException(e)
