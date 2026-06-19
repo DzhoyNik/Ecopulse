@@ -33,7 +33,9 @@ class AiAdvisorViewModel @Inject constructor(
 
     private val apiKey = BuildConfig.GEMINI_API_KEY
     private val model = GenerativeModel(
-        modelName = "gemini-1.5-flash",
+        // 1.5-flash отключён для новых проектов (404). Актуальная модель.
+        // Точный Model API ID для вашего ключа можно проверить в Google AI Studio.
+        modelName = "gemini-2.5-flash",
         apiKey = apiKey
     )
 
